@@ -22,8 +22,8 @@ class LinearRNN(nn.Module):
 
         for k in range(T):
             us = u[:, k, :]
-            y = x @ self.C.T + u @ self.D.T
+            y = x @ self.C.T + us @ self.D.T
             y_pred.append(y.unsqueeze(1))
-            x = x @ self.A.T + u @ self.B.T
+            x = x @ self.A.T + us @ self.B.T
 
         return  torch.cat(y_pred, dim=1)

@@ -94,16 +94,14 @@ for epoch in range(epochs):
     with torch.no_grad():
         Y_test_pred = model(U_test_torch, x0)
         test_loss = loss_fn(Y_test_pred, Y_test_torch)
+        val_pred = model(U_val_torch, x0)
+        val_loss = loss_fn(val_pred, Y_val_torch)
     
     # Save best model
     if test_loss.item() < best_test_loss:
         best_epoch = epoch
-        best_train_loss = train_loss.item()
-        
-        val_pred = model(U_val_torch, x0)
-        val_loss = loss_fn(val_pred, Y_val_torch)
+        best_train_loss = train_loss.item()        
         best_val_loss = val_loss.item()
-        
         best_test_loss = test_loss.item()
     
     times.append(time.time() - start_time)
@@ -111,14 +109,8 @@ for epoch in range(epochs):
     if epoch == 0:
         print(f"\nEpoch\tTrain loss\tVal loss\tTest loss")
         
-    if epoch % print_each == 0:
-        with torch.no_grad():
-            val_pred = model(U_val_torch, x0)
-            val_loss = loss_fn(val_pred, Y_val_torch)
-        if (epoch == 0):
-            print(f"{epoch + 1}\t{train_loss.item():.2E}\t{val_loss.item():.2E}\t{test_loss.item():.2E}")
-        else:
-            print(f"{epoch}\t{train_loss.item():.2E}\t{val_loss.item():.2E}\t{test_loss.item():.2E}")
+    if epoch % print_each == print_each-1:
+        print(f"{epoch + 1}\t{train_loss.item():.2E}\t{val_loss.item():.2E}\t{test_loss.item():.2E}")
 
 if len(times) > 100:
     print(f"\nAverage time per 100 epochs:\t{format_elapsed_time(np.mean(np.array(times[100:]) - np.array(times[:-100])))}")
@@ -127,7 +119,7 @@ else:
     
 print(f"Total training time:\t\t{format_elapsed_time(times[-1])}")
 print(f"\nBest model performance:")
-print(f"{best_epoch}\t{best_train_loss.item():.2E}\t{best_val_loss.item():.2E}\t{best_test_loss.item():.2E}\n")
+print(f"{best_epoch}\t{best_train_loss:.2E}\t{best_val_loss:.2E}\t{best_test_loss:.2E}\n")
     
 # Save model
 torch.save(model.state_dict(), f"saves/linear_rnn_model_{n}.pt")
