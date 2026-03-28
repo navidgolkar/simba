@@ -106,6 +106,6 @@ nx = 2
 x0 = x0_val = x0_test = torch.zeros((1,1,nx))
 
 name = f'SIMBa_{nx}'
-simba = Simba(nx=nx, nu=nu, ny=ny, parameters=parameters)
+simba = Simba(nx=nx, nu=nu, ny=ny, parameters=parameters) #nx=n, nu=m, ny=p
 simba.fit(U, U_val=U_val, U_test=U_test, X=X, X_val=X_val, X_test=X_test, Y=Y, Y_val=Y_val, Y_test=Y_test, x0=x0, x0_val=x0_val, x0_test=x0_test, baselines_to_use=baselines_to_use)
 simba.save(directory=directory, save_name=name)

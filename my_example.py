@@ -1,37 +1,32 @@
 import os
 import numpy as np
-import torch.nn.functional as F
+import torch.nn as nn
 import torch
-
 from simba.model import Simba
 from simba.util import fix_seed
-
 from simba.parameters import base_parameters, baselines_to_use
 parameters = base_parameters
 
-# Parameters
-seed = 1
-parameters['init_from_matlab_or_ls'] = True
-parameters['max_epochs'] = 10000
-parameters['init_epochs'] = 150000
-parameters['print_each'] = 1000
+from simba.linear_rnn import LinearRNN
+from simba.util import format_elapsed_time
+import time
+import copy
 
-# Simulation
-dt = 1228.8
-path_to_matlab = parameters['path_to_matlab']
-directory = os.path.join('saves', f'Daisy_init_new_{seed}')
-fix_seed(seed)
+#import warnings
+#warnings.filterwarnings('ignore')
 
 # Load and process data as in 
 # https://homes.esat.kuleuven.be/~smc/daisy/daisydata.html
+
 #print("Enter the dataset to use:")
 #dataset = input()
 #print("{dataset}")
 #data = 'data/'+dataset+'.dat'
 #data = np.genfromtxt(data)
+
 data = np.genfromtxt('data/powerplant.dat')
-U = data[:,1:6]
-Y = data[:,6:9]
+U = data[:,1:6]    #inputs
+Y = data[:,6:9]    #outputs
 Yr = data[:,9:12]
 
 nu = U.shape[1]
@@ -44,11 +39,11 @@ Y = Y.reshape(-1, H, ny)
 # Normalize
 um = np.mean(U, axis=1, keepdims=True)
 us = np.std(U, axis=1, keepdims=True)
-U = (U - um) / us
+U = (U - um) / us    #Z-score of training data inputs
 
 ym = np.mean(Y, axis=1, keepdims=True)
 ys = np.std(Y, axis=1, keepdims=True)
-Y = (Y - ym) / ys
+Y = (Y - ym) / ys    #Z-score of training data outputs
 
 # Define everything
 X = X_val = X_test = None
@@ -61,51 +56,78 @@ Y = Y[:,:100,:]
 
 print(U.shape, Y.shape, U_val.shape, Y_val.shape, U_test.shape)
 
-from simba.util import check_and_initialize_data
+_, _, m = U.shape
+_, _, p = Y.shape
+n = 2
+model = LinearRNN(n=n, m=m, p=p)
 
-# SIMBa
-# Standard parameters
-parameters['ms_horizon'] = None # No multiple shooting
-parameters['base_lambda'] = 1
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-# Tunable parameters
-parameters['learning_rate'] = 0.001
-parameters['grad_clip'] = 100
-parameters['train_loss'] = F.mse_loss
-parameters['val_loss'] = F.mse_loss
-parameters['dropout'] = 0
-parameters['device'] = 'cpu'
+def loss_fn(a, b):
+    return nn.functional.mse_loss(a, b)
 
-parameters['batch_size'] = 128
-parameters['horizon'] = None        # Prediction horizon of SIMBa
-parameters['stride'] = 1          # Lag between two time steps to start predicting from
-parameters['horizon_val'] = None  # None means entire trajectories
-parameters['stride_val'] = 1
+U_torch = torch.tensor(U, dtype=torch.float32)
+Y_torch = torch.tensor(Y, dtype=torch.float32)
+U_val_torch = torch.tensor(U_val, dtype=torch.float32)
+Y_val_torch = torch.tensor(Y_val, dtype=torch.float32)
+U_test_torch = torch.tensor(U_test, dtype=torch.float32)
+Y_test_torch = torch.tensor(Y_test, dtype=torch.float32)
 
-# Identify the state only
-parameters['id_D'] = True
-parameters['input_output'] = True
-parameters['learn_x0'] = True
+x0 = torch.zeros((U.shape[0], n))
+times = []
 
-# Enforce stability
-parameters['stable_A'] = True
-parameters['LMI_A'] = True
+epochs = 10000
+print_each = 1000
+best_epoch = 0
+best_train_loss = float("inf")
+best_val_loss = float("inf")
+best_test_loss = float("inf")
+start_time = time.time()
 
-parameters['delta'] = None
+for epoch in range(epochs):
+    optimizer.zero_grad()
+    y_pred = model(U_torch, x0)
+    train_loss = loss_fn(y_pred, Y_torch)
+    train_loss.backward()
+    optimizer.step()
+    
+    with torch.no_grad():
+        Y_test_pred = model(U_test_torch, x0)
+        test_loss = loss_fn(Y_test_pred, Y_test_torch)
+    
+    # Save best model
+    if test_loss.item() < best_test_loss:
+        best_epoch = epoch
+        best_train_loss = train_loss.item()
+        
+        val_pred = model(U_val_torch, x0)
+        val_loss = loss_fn(val_pred, Y_val_torch)
+        best_val_loss = val_loss.item()
+        
+        best_test_loss = test_loss.item()
+    
+    times.append(time.time() - start_time)
+        
+    if epoch == 0:
+        print(f"\nEpoch\tTrain loss\tVal loss\tTest loss")
+        
+    if epoch % print_each == 0:
+        with torch.no_grad():
+            val_pred = model(U_val_torch, x0)
+            val_loss = loss_fn(val_pred, Y_val_torch)
+        if (epoch == 0):
+            print(f"{epoch + 1}\t{train_loss.item():.2E}\t{val_loss.item():.2E}\t{test_loss.item():.2E}")
+        else:
+            print(f"{epoch}\t{train_loss.item():.2E}\t{val_loss.item():.2E}\t{test_loss.item():.2E}")
 
-# Evaluate classical sysID baselines
-baselines_to_use['parsim_s'] = False # Fails for some reason?
-baselines_to_use['parsim_p'] = False # Fails for some reason?
-
-x0 = x0_val = x0_test = np.zeros((1,1,2))
-U, U_val, U_test, X, X_val, X_test, Y, Y_val, Y_test, x0, x0_val, x0_test = check_and_initialize_data(U, U_val, U_test, X, X_val, X_test, Y, Y_val, Y_test, x0, x0_val, x0_test,
-                                                                                                            verbose=parameters['verbose'], autonomous=parameters['autonomous'], 
-                                                                                                            input_output=parameters['input_output'], device=parameters['device'])
-# Fit a state-space model with nx = 2
-nx = 2
-x0 = x0_val = x0_test = torch.zeros((1,1,nx))
-
-name = f'SIMBa_{nx}'
-simba = Simba(nx=nx, nu=nu, ny=ny, parameters=parameters)
-simba.fit(U, U_val=U_val, U_test=U_test, X=X, X_val=X_val, X_test=X_test, Y=Y, Y_val=Y_val, Y_test=Y_test, x0=x0, x0_val=x0_val, x0_test=x0_test, baselines_to_use=baselines_to_use)
-simba.save(directory=directory, save_name=name)
+if len(times) > 100:
+    print(f"\nAverage time per 100 epochs:\t{format_elapsed_time(np.mean(np.array(times[100:]) - np.array(times[:-100])))}")
+else:
+    print(f"")
+    
+print(f"Total training time:\t\t{format_elapsed_time(times[-1])}")
+print(f"\nBest model performance:")
+print(f"{best_epoch}\t{best_train_loss.item():.2E}\t{best_val_loss.item():.2E}\t{best_test_loss.item():.2E}\n")
+    
+# Save model
+torch.save(model.state_dict(), f"saves/linear_rnn_model_{n}.pt")
