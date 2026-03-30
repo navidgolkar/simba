@@ -491,7 +491,7 @@ class SIMBaWrapper(SIMBa):
                     torch.nn.utils.clip_grad_value_(self.parameters(), self.init_grad_clip)
                     self.init_optimizer.step()
 
-                    self.init_losses.append(float(loss))
+                    self.init_losses.append(float(loss.detach()))
                     if (self.verbose > 0) and ((epoch % self.init_print_each == self.init_print_each-1) or (epoch==0)):
                         print(f'{epoch + 1}\t{self.init_losses[-1]:.2E}')
 
@@ -592,8 +592,10 @@ class SIMBaWrapper(SIMBa):
             
         U, U_val, U_test, X, X_val, X_test, Y, Y_val, Y_test, x0, x0_val, x0_test = self.prepare_data(U, U_val, U_test, X, X_val, X_test, Y, Y_val, Y_test, x0, x0_val, x0_test)
 
+        if not self.auto_fit:
+            print("\n<-- Training of SIMBa starts! -->")
         if (self.verbose > 0) and not self.auto_fit:
-            print(f"\nTraining of SIMBa starts!\nTraining data shape:\t({U.shape[0]}, {U.shape[1]}, *)\nValidation data shape:\t({U_val.shape[0]}, {U_val.shape[1]}, *)\nTest data shape:\t({U_test.shape[0]}, {U_test.shape[1]}, *)\n")
+            print(f"Training data shape:\t({U.shape[0]}, {U.shape[1]}, *)\nValidation data shape:\t({U_val.shape[0]}, {U_val.shape[1]}, *)\nTest data shape:\t({U_test.shape[0]}, {U_test.shape[1]}, *)\n")
         
         if len(self.val_losses) > 0:
             self.best_loss = np.min(self.val_losses)
@@ -647,10 +649,10 @@ class SIMBaWrapper(SIMBa):
                             norm_losses.append(self.norm_loss(predictions * mask * drop, batch_data * mask * drop))
                     if self.ms_horizon is not None:
                         with torch.no_grad():
-                            ms_losses.append(float(loss))
+                            ms_losses.append(float(loss.detach()))
                             train_losses.append(float(self.train_loss(predictions * mask * drop, batch_data * mask * drop)))
                     else:
-                        train_losses.append(float(loss))
+                        train_losses.append(float(loss.detach()))
 
                 self.train_losses.append(sum([l*s for l,s in zip(train_losses, train_sizes)]) / sum(train_sizes))
                 if self.norm:
@@ -669,7 +671,7 @@ class SIMBaWrapper(SIMBa):
                     predictions, _ = self.forward(x0=batch_x0, u_=batch_u, y0=batch_y0, ms_train=False)
                     loss = self.val_loss(predictions * val_mask, batch_data * val_mask)
                     
-                    val_losses.append(float(loss))
+                    val_losses.append(float(loss.detach()))
                     val_sizes.append(len(batch_u))
                     if self.norm:
                         with torch.no_grad():
@@ -690,7 +692,7 @@ class SIMBaWrapper(SIMBa):
                         predictions, _ = self.forward(x0=batch_x0, u_=batch_u, y0=batch_y0, ms_train=False)
                         loss = self.val_loss(predictions * test_mask, batch_data * test_mask)
                         
-                        test_losses.append(float(loss))
+                        test_losses.append(float(loss.detach()))
                         test_sizes.append(len(batch_u))
                         if self.norm:
                             with torch.no_grad():
@@ -777,13 +779,14 @@ class SIMBaWrapper(SIMBa):
                 'train_losses': self.train_losses,
                 'val_losses': self.val_losses,
                 'test_losses': self.test_losses,
+                'times': self.times,
             },
             savename,
         )
     
     def load(self, directory, save_name):
         # Load the checkpoint
-        checkpoint = torch.load(os.path.join(directory, f'{save_name}.pt'), map_location=lambda storage, loc: storage)
+        checkpoint = torch.load(os.path.join(directory, f'{save_name}.pt'), map_location=lambda storage, loc: storage, weights_only=False)
 
         # Put it into the model
         self.load_state_dict(checkpoint['model_state_dict'])
@@ -800,10 +803,23 @@ class SIMBaWrapper(SIMBa):
         self.train_losses = checkpoint['train_losses']
         self.val_losses = checkpoint['val_losses']
         self.test_losses = checkpoint['test_losses']
+        self.times = checkpoint['times']
         self.is_initialized = True
         
-        # Check parameter copliance
-        self.check_loaded_run() 
+        # Check parameter compliance
+        self.check_loaded_run()
+        
+    def load_simple(self, directory, save_name):
+        # Load the checkpoint
+        checkpoint = torch.load(os.path.join(directory, f'{save_name}.pt'), map_location=lambda storage, loc: storage, weights_only=False)
+        self.loaded_params = checkpoint['params']
+        self.loaded_data = checkpoint['fit_data']
+        self.init_losses = checkpoint['init_losses']
+        self.train_losses = checkpoint['train_losses']
+        self.val_losses = checkpoint['val_losses']
+        self.test_losses = checkpoint['test_losses']
+        self.times = checkpoint['times']
+        self.is_initialized = True
 
     def check_loaded_run(self):
         for key, value in self.loaded_params.items():

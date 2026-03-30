@@ -1,0 +1,85 @@
+SIPPY could not be loaded
+
+Initilization starts, fitting A!
+Epoch	Fitting loss
+1	5.72E-01
+50000	3.10E-05
+100000	2.05E-06
+150000	1.53E-06
+Total initialization time:	01'40"
+Best loss at epoch 112074:	1.40E-08
+
+Matlab performance (Train and validation are only measured on the
+first trajectory if there are several for now):
+Train loss	Val loss	Test loss
+5.59E-02	1.10E-01	1.09E+00
+
+<-- Training of SIMBa starts! -->
+Training data shape:	(1, 100, *)
+Validation data shape:	(1, 150, *)
+Test data shape:	(1, 50, *)
+
+Epoch	Train loss	Val loss	Test loss
+1	5.66E-02	1.08E-01	1.12E+00
+1000	1.80E-02	4.05E-02	3.04E-01
+2000	1.76E-02	3.98E-02	2.31E-01
+3000	1.75E-02	4.10E-02	2.37E-01
+4000	1.76E-02	4.18E-02	2.42E-01
+5000	1.75E-02	4.19E-02	2.46E-01
+6000	1.75E-02	4.20E-02	2.47E-01
+7000	1.75E-02	4.20E-02	2.47E-01
+8000	1.75E-02	4.20E-02	2.47E-01
+9000	1.75E-02	4.20E-02	2.47E-01
+10000	1.75E-02	4.23E-02	2.44E-01
+
+Average time per 100 epochs:	03"
+Total training time:		05'43"
+
+Best model performance:
+1545	1.78E-02	3.89E-02	2.51E-01
+
+<-- Training of Linear RNN starts! -->
+Training data shape:	(1, 100, *)
+Validation data shape:	(1, 150, *)
+Test data shape:	(1, 50, *)
+
+
+Epoch	Train loss	Val loss	Test loss
+1	6.93E-01	8.86E-01	1.17E+00
+1000	3.55E-02	1.30E-01	1.54E+00
+2000	2.50E-02	1.06E-01	1.16E+00
+3000	2.27E-02	8.12E-02	7.66E-01
+4000	2.17E-02	8.06E-02	6.73E-01
+5000	2.12E-02	8.63E-02	6.69E-01
+6000	2.09E-02	9.26E-02	6.58E-01
+7000	2.07E-02	9.90E-02	6.53E-01
+8000	2.06E-02	1.03E-01	6.53E-01
+9000	2.06E-02	1.05E-01	6.53E-01
+10000	2.06E-02	1.05E-01	6.53E-01
+
+Average time per 100 epochs:	02"
+Total training time:		03'47"
+
+Best model performance (by val loss):
+3472	2.21E-02	7.90E-02	6.95E-01
+
+
+--- Linear RNN vs SIMBa ---
+nx(n)	Learning rate	Max epoch	Gradient value clip
+2	1.00E-03	10000		100
+
+Best model performance:
+Model		Epoch	Train loss	Val loss	Test loss
+SIMBa		1544	1.78E-02	3.89E-02	2.51E-01
+Linear RNN	3472	2.21E-02	7.90E-02	6.95E-01
+
+Sample complexity:
+Model		Tolerance	Epoch	Train loss	Val loss	Test loss	Time
+SIMBa		4.00E-02	2104	1.76E-02	4.00E-02	2.29E-01	01'13"
+Linear RNN	4.00E-02	3472	2.21E-02	7.90E-02	6.95E-01	01'19"
+
+Time performance:
+Model		max epochs	total train time	Avg t per 100 epochs
+SIMBa		10000		05'43"			03"
+Linear RNN	10000		03'47"			02"
+None
