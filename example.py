@@ -1,43 +1,50 @@
 import os
 import numpy as np
 import torch.nn.functional as F
-import torch
 
 from simba.model import Simba
 from simba.util import fix_seed
 from simba.util import check_and_initialize_data
-from simba.parameters import base_parameters, baselines_to_use, check_parameters
+from simba.parameters import base_parameters, baselines_to_use
 parameters = base_parameters
 
-def simba_load(seed, nx, nu, ny):
-    import os
-    from simba.parameters import base_parameters as parameters
-    import simba.model as sim
-    parameters['device'] = 'cpu'
-    parameters['id_D'] = True
-    parameters['input_output'] = True
-    parameters['learn_x0'] = True
-    path = os.path.join("saves", f"Daisy_init_new_{seed}")
-    model = sim.Simba(nx=nx, nu=nu, ny=ny, parameters=parameters)
-    model.load(path, f"SIMBa_{nx}")
-    parameters = model.loaded_params
-    return model.val_losses, model.test_losses, model.train_losses, model.times, parameters['learning_rate'], parameters['print_each'], parameters['max_epochs']
-
-def simba_run(seed=1, U=None, Y=None, U_val=None, Y_val=None, U_test=None, Y_test=None, X=None, X_val=None, X_test=None, nx=2, nu=100, ny=3, lr=0.001, max_ep=10000, print_each=1000, grad_clip=100):
+def simba_run(seed=1, U=None, Y=None, nx=2, lr=0.001, max_ep=10000, print_each=1000, grad_clip=100):
     # Parameters
     parameters['init_from_matlab_or_ls'] = True
     parameters['max_epochs'] = max_ep
     parameters['init_epochs'] = 150000
-    if (print_each <= 0):
-        parameters['verbose'] = 0
-        parameters['print_each'] = max_ep
-    else:
-        parameters['verbose'] = 1
-        parameters['print_each'] = print_each
+    parameters['print_each'] = print_each
     
     # Simulation
+    dt = 1228.8
+    path_to_matlab = parameters['path_to_matlab']
     directory = os.path.join('saves', f'Daisy_init_new_{seed}')
     fix_seed(seed)
+    
+    nu = U.shape[1]
+    ny = Y.shape[1]
+    H = Y.shape[0]
+    
+    U = U.reshape(-1, H, nu)
+    Y = Y.reshape(-1, H, ny)
+    
+    # Normalize
+    um = np.mean(U, axis=1, keepdims=True)
+    us = np.std(U, axis=1, keepdims=True)
+    U = (U - um) / us
+    
+    ym = np.mean(Y, axis=1, keepdims=True)
+    ys = np.std(Y, axis=1, keepdims=True)
+    Y = (Y - ym) / ys
+    
+    # Define everything
+    X = X_val = X_test = None
+    U_val = U[:,:150,:].copy()
+    Y_val = Y[:,:150,:].copy()
+    U_test = U[:,150:,:].copy()
+    Y_test = Y[:,150:,:].copy()
+    U = U[:,:100,:]
+    Y = Y[:,:100,:]
     
     # SIMBa
     # Standard parameters
@@ -82,6 +89,5 @@ def simba_run(seed=1, U=None, Y=None, U_val=None, Y_val=None, U_test=None, Y_tes
     name = f'SIMBa_{nx}'
     simba = Simba(nx=nx, nu=nu, ny=ny, parameters=parameters) #nx=n, nu=m, ny=p
     simba.fit(U, U_val=U_val, U_test=U_test, X=X, X_val=X_val, X_test=X_test, Y=Y, Y_val=Y_val, Y_test=Y_test, x0=x0, x0_val=x0_val, x0_test=x0_test, baselines_to_use=baselines_to_use)
-    simba.save(directory=directory, save_name=name)
     
-    return simba.val_losses, simba.test_losses, simba.train_losses, simba.times
+    simba.save(directory=directory, save_name=name)

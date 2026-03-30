@@ -808,18 +808,6 @@ class SIMBaWrapper(SIMBa):
         
         # Check parameter compliance
         self.check_loaded_run()
-        
-    def load_simple(self, directory, save_name):
-        # Load the checkpoint
-        checkpoint = torch.load(os.path.join(directory, f'{save_name}.pt'), map_location=lambda storage, loc: storage, weights_only=False)
-        self.loaded_params = checkpoint['params']
-        self.loaded_data = checkpoint['fit_data']
-        self.init_losses = checkpoint['init_losses']
-        self.train_losses = checkpoint['train_losses']
-        self.val_losses = checkpoint['val_losses']
-        self.test_losses = checkpoint['test_losses']
-        self.times = checkpoint['times']
-        self.is_initialized = True
 
     def check_loaded_run(self):
         for key, value in self.loaded_params.items():

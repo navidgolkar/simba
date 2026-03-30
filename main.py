@@ -57,7 +57,7 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
                                                                                      print_each=print_each, grad_clip=grad_clip)
     
     # # Load SIMBa checkpoint
-    # val_losses_simba, test_losses_simba, train_losses_simba, times_simba = simba_load(seed=seed, nx=nx, nu=nu, ny=ny)
+    # val_losses_simba, test_losses_simba, train_losses_simba, times_simba, lr, print_each, max_epochs = simba_load(seed=seed, nx=nx, nu=nu, ny=ny)
     best_epoch_simba = int(np.argmin(val_losses_simba))
     if len(times_simba) > 100:
         avg_time_simba = np.mean(np.array(times_simba[100:]) - np.array(times_simba[:-100]))     
@@ -128,27 +128,30 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
         idx = np.where(np.array(val_losses_rnn) <= epsilons[i])[0]
         idx_rnn = int(idx[0]) if len(idx) > 0 else None
         empty = f"{'-'*8}"
-        if idx_simba is None:
-            print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("SIMBa",f"{epsilons[i]:.2E}",f"{empty}",f"{empty}",f"{empty}",f"{empty}",f"{empty}"))
+        if (idx_simba is None) and (idx_rnn is None):
+            continue
         else:
-            print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("SIMBa",
-                                                                      f"{epsilons[i]:.2E}",
-                                                                      f"{idx_simba+1}",
-                                                                      f"{train_losses_simba[idx_simba]:.2E}",
-                                                                      f"{val_losses_simba[idx_simba]:.2E}",
-                                                                      f"{test_losses_simba[idx_simba]:.2E}",
-                                                                      f"{format_elapsed_time(times_simba[idx_simba])}"))
-        if idx_rnn is None:
-            print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("RNN",f"{epsilons[i]:.2E}",f"{empty}",f"{empty}",f"{empty}",f"{empty}",f"{empty}"))
-        else:
-            print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("SIMBa",
-                                                                      f"{epsilons[i]:.2E}",
-                                                                      f"{idx_rnn+1}",
-                                                                      f"{train_losses_rnn[idx_rnn]:.2E}",
-                                                                      f"{val_losses_rnn[idx_rnn]:.2E}",
-                                                                      f"{test_losses_rnn[idx_rnn]:.2E}",
-                                                                      f"{format_elapsed_time(times_rnn[idx_rnn])}"))
-        print(f"{'─ '*42}")
+            if idx_simba is None:
+                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("SIMBa",f"{epsilons[i]:.2E}",f"{empty}",f"{empty}",f"{empty}",f"{empty}",f"{empty}"))
+            else:
+                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("SIMBa",
+                                                                          f"{epsilons[i]:.2E}",
+                                                                          f"{idx_simba+1}",
+                                                                          f"{train_losses_simba[idx_simba]:.2E}",
+                                                                          f"{val_losses_simba[idx_simba]:.2E}",
+                                                                          f"{test_losses_simba[idx_simba]:.2E}",
+                                                                          f"{format_elapsed_time(times_simba[idx_simba])}"))
+            if idx_rnn is None:
+                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("RNN",f"{epsilons[i]:.2E}",f"{empty}",f"{empty}",f"{empty}",f"{empty}",f"{empty}"))
+            else:
+                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("SIMBa",
+                                                                          f"{epsilons[i]:.2E}",
+                                                                          f"{idx_rnn+1}",
+                                                                          f"{train_losses_rnn[idx_rnn]:.2E}",
+                                                                          f"{val_losses_rnn[idx_rnn]:.2E}",
+                                                                          f"{test_losses_rnn[idx_rnn]:.2E}",
+                                                                          f"{format_elapsed_time(times_rnn[idx_rnn])}"))
+            print(f"{'_'*84}")
     
     print("\nTime and space performance for training:")
     print(" {:<12}".format("Model"), end="")
