@@ -57,7 +57,7 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
                                                                                      print_each=print_each, grad_clip=grad_clip)
     
     # # Load SIMBa checkpoint
-    # val_losses_simba, test_losses_simba, train_losses_simba, times_simba, lr, print_each, max_epochs = simba_load(seed=seed, nx=nx, nu=nu, ny=ny)
+    # val_losses_simba, test_losses_simba, train_losses_simba, times_simba, lr, print_each, max_epoch = simba_load(seed=seed, nx=nx, nu=nu, ny=ny)
     best_epoch_simba = int(np.argmin(val_losses_simba))
     if len(times_simba) > 100:
         avg_time_simba = np.mean(np.array(times_simba[100:]) - np.array(times_simba[:-100]))     
@@ -123,10 +123,10 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     print("{:<12}".format("Time"))
     print(f"{'='*84}")
     for i in range(len(epsilons)):
-        idx = np.argmin(np.abs(np.array(val_losses_simba) - epsilons[i]))
-        idx_simba = idx if np.abs(val_losses_simba[idx]-epsilons[i])/epsilons[i] < 0.1 else None
-        idx = np.argmin(np.abs(np.array(val_losses_rnn) - epsilons[i]))
-        idx_rnn = idx if np.abs(val_losses_rnn[idx]-epsilons[i])/epsilons[i] < 0.1 else None
+        idx = np.where((np.array(val_losses_simba)-epsilons[i])/epsilons[i] < 0.1)[0]
+        idx_simba = int(idx[0]) if len(idx) > 0 else None
+        idx = np.where((np.array(val_losses_rnn)-epsilons[i])/epsilons[i] < 0.1)[0]
+        idx_rnn = int(idx[0]) if len(idx) > 0 else None
         empty = f"{'-'*8}"
         if (idx_simba is None) and (idx_rnn is None):
             continue
@@ -170,6 +170,7 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     print("{:<12}".format(f"{param_rnn}"), end="")
     print("{:<12}".format(f"{format_elapsed_time(times_rnn[-1])}"), end="")
     print("{:<12}".format(f"{format_elapsed_time(avg_time_rnn)}"))
+    print(f"{'#'*84}")
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
