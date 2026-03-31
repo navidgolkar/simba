@@ -85,7 +85,7 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     print("{:<12}".format("LR"), end="")
     print("{:<12}".format("Max e"), end="")
     print("{:<12}".format("Grad clip"))
-    print(f"{'= '*24}")
+    print(f"{'='*48}")
     print(" {:<12}".format(f"{nx}"), end="")
     print("{:<12}".format(f"{lr:.2E}"), end="")
     print("{:<12}".format(f"{max_epoch}"), end="")
@@ -98,7 +98,7 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     print("{:<12}".format("Val loss"), end="")
     print("{:<12}".format("Test loss"), end="")
     print("{:<12}".format("Time"))
-    print(f"{'= '*36}")
+    print(f"{'='*72}")
     print(" {:<12}".format("SIMBa"), end="")
     print("{:<12}".format(f"{best_epoch_simba+1}"), end="")
     print("{:<12}".format(f"{train_losses_simba[best_epoch_simba]:.2E}"), end="")
@@ -113,7 +113,7 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     print("{:<12}".format(f"{format_elapsed_time(times_rnn[best_epoch_rnn])}"))
     
     print("\nConvergence speed performance:")
-    epsilons = [0.5, 0.1, 0.05, 0.01, 0.005, 0.001]
+    epsilons = [0.75, 0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]
     print(" {:<12}".format("Model"), end="")
     print("{:<12}".format("Epsilon"), end="")
     print("{:<12}".format("Epoch"), end="")
@@ -121,12 +121,12 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     print("{:<12}".format("Val loss"), end="")
     print("{:<12}".format("Test loss"), end="")
     print("{:<12}".format("Time"))
-    print(f"{'= '*42}")
+    print(f"{'='*84}")
     for i in range(len(epsilons)):
-        idx = np.where(np.array(val_losses_simba) <= epsilons[i])[0]
-        idx_simba = int(idx[0]) if len(idx) > 0 else None
-        idx = np.where(np.array(val_losses_rnn) <= epsilons[i])[0]
-        idx_rnn = int(idx[0]) if len(idx) > 0 else None
+        idx = np.argmin(np.abs(np.array(val_losses_simba) - epsilons[i]))
+        idx_simba = idx if np.abs(val_losses_simba[idx]-epsilons[i])/epsilons[i] < 0.1 else None
+        idx = np.argmin(np.abs(np.array(val_losses_rnn) - epsilons[i]))
+        idx_rnn = idx if np.abs(val_losses_rnn[idx]-epsilons[i])/epsilons[i] < 0.1 else None
         empty = f"{'-'*8}"
         if (idx_simba is None) and (idx_rnn is None):
             continue
@@ -144,7 +144,7 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
             if idx_rnn is None:
                 print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("RNN",f"{epsilons[i]:.2E}",f"{empty}",f"{empty}",f"{empty}",f"{empty}",f"{empty}"))
             else:
-                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("SIMBa",
+                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("RNN",
                                                                           f"{epsilons[i]:.2E}",
                                                                           f"{idx_rnn+1}",
                                                                           f"{train_losses_rnn[idx_rnn]:.2E}",
@@ -159,7 +159,7 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     print("{:<12}".format("# params"), end="")
     print("{:<12}".format("Total time"), end="")
     print("{:<12}".format("avg time/100e"))
-    print(f"{'= '*30}")
+    print(f"{'='*60}")
     print(" {:<12}".format("SIMBa"), end="")
     print("{:<12}".format(f"{max_epoch}"), end="")
     print("{:<12}".format(f"{param_simba}"), end="")
