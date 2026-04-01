@@ -49,29 +49,29 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     Y = Y[:,:100,:]
     
     # %% SIMBa run or load
-    # Run SIMBa
-    val_losses_simba, test_losses_simba, train_losses_simba, times_simba = simba_run(seed=seed, U=U, Y=Y, U_val=U_val,
-                                                                                     Y_val=Y_val, U_test=U_test, Y_test=Y_test,
-                                                                                     X=X, X_val=X_val, X_test=X_test,
-                                                                                     nx=nx, nu=nu, ny=ny, lr=lr, max_ep=max_epoch,
-                                                                                     print_each=print_each, grad_clip=grad_clip)
+    # # Run SIMBa
+    # val_losses_simba, test_losses_simba, train_losses_simba, times_simba = simba_run(seed=seed, U=U, Y=Y, U_val=U_val,
+    #                                                                                  Y_val=Y_val, U_test=U_test, Y_test=Y_test,
+    #                                                                                  X=X, X_val=X_val, X_test=X_test,
+    #                                                                                  nx=nx, nu=nu, ny=ny, lr=lr, max_ep=max_epoch,
+    #                                                                                  print_each=print_each, grad_clip=grad_clip)
     
-    # # Load SIMBa checkpoint
-    # val_losses_simba, test_losses_simba, train_losses_simba, times_simba, lr, print_each, max_epoch = simba_load(seed=seed, nx=nx, nu=nu, ny=ny)
+    # Load SIMBa checkpoint
+    val_losses_simba, test_losses_simba, train_losses_simba, times_simba, lr, print_each, max_epoch = simba_load(seed=seed, nx=nx, nu=nu, ny=ny)
     best_epoch_simba = int(np.argmin(val_losses_simba))
     if len(times_simba) > 100:
         avg_time_simba = np.mean(np.array(times_simba[100:]) - np.array(times_simba[:-100]))     
     
     # %% Linear RNN run or load
-    # Run Linear RNN
-    val_losses_rnn, test_losses_rnn, train_losses_rnn, times_rnn = rnn_run(seed=seed, U=U, Y=Y, U_val=U_val,
-                                                                                     Y_val=Y_val, U_test=U_test, Y_test=Y_test,
-                                                                                     X=X, X_val=X_val, X_test=X_test,
-                                                                                     n=nx, m=nu, p=ny, lr=lr, max_ep=max_epoch,
-                                                                                     print_each=print_each, grad_clip=grad_clip)
+    # # Run Linear RNN
+    # val_losses_rnn, test_losses_rnn, train_losses_rnn, times_rnn = rnn_run(seed=seed, U=U, Y=Y, U_val=U_val,
+    #                                                                                  Y_val=Y_val, U_test=U_test, Y_test=Y_test,
+    #                                                                                  X=X, X_val=X_val, X_test=X_test,
+    #                                                                                  n=nx, m=nu, p=ny, lr=lr, max_ep=max_epoch,
+    #                                                                                  print_each=print_each, grad_clip=grad_clip)
     
-    # # Load Linear RNN checkpoint
-    # val_losses_rnn, test_losses_rnn, train_losses_rnn, times_rnn = rnn_load(seed=seed, n=nx, m=nu, p=ny)
+    # Load Linear RNN checkpoint
+    val_losses_rnn, test_losses_rnn, train_losses_rnn, times_rnn = rnn_load(seed=seed, n=nx, m=nu, p=ny)
     best_epoch_rnn = int(np.argmin(val_losses_rnn))
     if len(times_rnn) > 100:
         avg_time_rnn = np.mean(np.array(times_rnn[100:]) - np.array(times_rnn[:-100]))   
@@ -80,48 +80,48 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     param_simba = 5*(nx**2) + nx*nu + ny*nx + ny*nu + nx
     param_rnn = nx*nx + nx*nu + ny*nx + ny*nu
     
-    print("\n<----- Linear RNN vs SIMBa ----->")
-    print(" {:<12}".format("n"), end="")
-    print("{:<12}".format("LR"), end="")
-    print("{:<12}".format("Max e"), end="")
-    print("{:<12}".format("Grad clip"))
-    print(f"{'='*48}")
-    print(" {:<12}".format(f"{nx}"), end="")
-    print("{:<12}".format(f"{lr:.2E}"), end="")
-    print("{:<12}".format(f"{max_epoch}"), end="")
-    print("{:<12}".format(f"{grad_clip}"))
+    print("\n## Linear RNN vs SIMBa")
+    print("| {:<12}".format("n"), end="")
+    print("| {:<12}".format("LR"), end="")
+    print("| {:<12}".format("Max e"), end="")
+    print("| {:<12}".format("Grad clip"), end="|\n")
+    print(f"{'| :---------: '*4}|")
+    print("| {:<12}".format(f"{nx}"), end="")
+    print("| {:<12}".format(f"{lr:.2E}"), end="")
+    print("| {:<12}".format(f"{max_epoch}"), end="")
+    print("| {:<12}".format(f"{grad_clip}"), end="|\n")
     
-    print("\nBest model performance:")
-    print(" {:<12}".format("Model"), end="")
-    print("{:<12}".format("Epoch"), end="")
-    print("{:<12}".format("Train loss"), end="")
-    print("{:<12}".format("Val loss"), end="")
-    print("{:<12}".format("Test loss"), end="")
-    print("{:<12}".format("Time"))
-    print(f"{'='*72}")
-    print(" {:<12}".format("SIMBa"), end="")
-    print("{:<12}".format(f"{best_epoch_simba+1}"), end="")
-    print("{:<12}".format(f"{train_losses_simba[best_epoch_simba]:.2E}"), end="")
-    print("{:<12}".format(f"{val_losses_simba[best_epoch_simba]:.2E}"), end="")
-    print("{:<12}".format(f"{test_losses_simba[best_epoch_simba]:.2E}"), end="")
-    print("{:<12}".format(f"{format_elapsed_time(times_simba[best_epoch_simba])}"))
-    print(" {:<12}".format("RNN"), end="")
-    print("{:<12}".format(f"{best_epoch_rnn+1}"), end="")
-    print("{:<12}".format(f"{train_losses_rnn[best_epoch_rnn]:.2E}"), end="")
-    print("{:<12}".format(f"{val_losses_rnn[best_epoch_rnn]:.2E}"), end="")
-    print("{:<12}".format(f"{test_losses_rnn[best_epoch_rnn]:.2E}"), end="")
-    print("{:<12}".format(f"{format_elapsed_time(times_rnn[best_epoch_rnn])}"))
+    print("\n\n**Best model performance:**")
+    print("| {:<12}".format("Model"), end="")
+    print("| {:<12}".format("Epoch"), end="")
+    print("| {:<12}".format("Train loss"), end="")
+    print("| {:<12}".format("Val loss"), end="")
+    print("| {:<12}".format("Test loss"), end="")
+    print("| {:<12}".format("Time"), end="|\n")
+    print(f"{'| :---------: '*6}|")
+    print("| {:<12}".format("SIMBa"), end="")
+    print("| {:<12}".format(f"{best_epoch_simba+1}"), end="")
+    print("| {:<12}".format(f"{train_losses_simba[best_epoch_simba]:.2E}"), end="")
+    print("| {:<12}".format(f"{val_losses_simba[best_epoch_simba]:.2E}"), end="")
+    print("| {:<12}".format(f"{test_losses_simba[best_epoch_simba]:.2E}"), end="")
+    print("| {:<12}".format(f"{format_elapsed_time(times_simba[best_epoch_simba])}"), end="|\n")
+    print("| {:<12}".format("RNN"), end="")
+    print("| {:<12}".format(f"{best_epoch_rnn+1}"), end="")
+    print("| {:<12}".format(f"{train_losses_rnn[best_epoch_rnn]:.2E}"), end="")
+    print("| {:<12}".format(f"{val_losses_rnn[best_epoch_rnn]:.2E}"), end="")
+    print("| {:<12}".format(f"{test_losses_rnn[best_epoch_rnn]:.2E}"), end="")
+    print("| {:<12}".format(f"{format_elapsed_time(times_rnn[best_epoch_rnn])}"), end="|\n")
     
-    print("\nConvergence speed performance:")
+    print("\n\n**Convergence speed performance:**")
     epsilons = [0.75, 0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]
-    print(" {:<12}".format("Model"), end="")
-    print("{:<12}".format("Epsilon"), end="")
-    print("{:<12}".format("Epoch"), end="")
-    print("{:<12}".format("Train loss"), end="")
-    print("{:<12}".format("Val loss"), end="")
-    print("{:<12}".format("Test loss"), end="")
-    print("{:<12}".format("Time"))
-    print(f"{'='*84}")
+    print("| {:<12}".format("Model"), end="")
+    print("| {:<12}".format("Epsilon"), end="")
+    print("| {:<12}".format("Epoch"), end="")
+    print("| {:<12}".format("Train loss"), end="")
+    print("| {:<12}".format("Val loss"), end="")
+    print("| {:<12}".format("Test loss"), end="")
+    print("| {:<12}".format("Time"), end="|\n")
+    print(f"{'| :---------: '*7}|")
     for i in range(len(epsilons)):
         idx = np.where((np.array(val_losses_simba)-epsilons[i])/epsilons[i] < 0.1)[0]
         idx_simba = int(idx[0]) if len(idx) > 0 else None
@@ -132,9 +132,9 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
             continue
         else:
             if idx_simba is None:
-                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("SIMBa",f"{epsilons[i]:.2E}",f"{empty}",f"{empty}",f"{empty}",f"{empty}",f"{empty}"))
+                print("| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}|".format("SIMBa",f"{epsilons[i]:.2E}",f"{empty}",f"{empty}",f"{empty}",f"{empty}",f"{empty}"))
             else:
-                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("SIMBa",
+                print("| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}|".format("SIMBa",
                                                                           f"{epsilons[i]:.2E}",
                                                                           f"{idx_simba+1}",
                                                                           f"{train_losses_simba[idx_simba]:.2E}",
@@ -142,35 +142,34 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
                                                                           f"{test_losses_simba[idx_simba]:.2E}",
                                                                           f"{format_elapsed_time(times_simba[idx_simba])}"))
             if idx_rnn is None:
-                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("RNN",f"{epsilons[i]:.2E}",f"{empty}",f"{empty}",f"{empty}",f"{empty}",f"{empty}"))
+                print("| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}|".format("RNN",f"{epsilons[i]:.2E}",f"{empty}",f"{empty}",f"{empty}",f"{empty}",f"{empty}"))
             else:
-                print(" {:<12}{:<12}{:<12}{:<12}{:<12}{:<12}{:<12}".format("RNN",
+                print("| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}| {:<12}|".format("RNN",
                                                                           f"{epsilons[i]:.2E}",
                                                                           f"{idx_rnn+1}",
                                                                           f"{train_losses_rnn[idx_rnn]:.2E}",
                                                                           f"{val_losses_rnn[idx_rnn]:.2E}",
                                                                           f"{test_losses_rnn[idx_rnn]:.2E}",
                                                                           f"{format_elapsed_time(times_rnn[idx_rnn])}"))
-            print(f"{'_'*84}")
     
-    print("\nTime and space performance for training:")
-    print(" {:<12}".format("Model"), end="")
-    print("{:<12}".format("max e"), end="")
-    print("{:<12}".format("# params"), end="")
-    print("{:<12}".format("Total time"), end="")
-    print("{:<12}".format("avg time/100e"))
-    print(f"{'='*60}")
-    print(" {:<12}".format("SIMBa"), end="")
-    print("{:<12}".format(f"{max_epoch}"), end="")
-    print("{:<12}".format(f"{param_simba}"), end="")
-    print("{:<12}".format(f"{format_elapsed_time(times_simba[-1])}"), end="")
-    print("{:<12}".format(f"{format_elapsed_time(avg_time_simba)}"))
-    print(" {:<12}".format("RNN"), end="")
-    print("{:<12}".format(f"{max_epoch}"), end="")
-    print("{:<12}".format(f"{param_rnn}"), end="")
-    print("{:<12}".format(f"{format_elapsed_time(times_rnn[-1])}"), end="")
-    print("{:<12}".format(f"{format_elapsed_time(avg_time_rnn)}"))
-    print(f"{'#'*84}")
+    print("\n\n**Time and space performance for training:**")
+    print("| {:<12}".format("Model"), end="")
+    print("| {:<12}".format("max e"), end="")
+    print("| {:<12}".format("# params"), end="")
+    print("| {:<12}".format("Total time"), end="")
+    print("| {:<12}".format("avg time/100e"), end="|\n")
+    print(f"{'| :---------: '*5}|")
+    print("| {:<12}".format("SIMBa"), end="")
+    print("| {:<12}".format(f"{max_epoch}"), end="")
+    print("| {:<12}".format(f"{param_simba}"), end="")
+    print("| {:<12}".format(f"{format_elapsed_time(times_simba[-1])}"), end="")
+    print("| {:<12}".format(f"{format_elapsed_time(avg_time_simba)}"))
+    print("| {:<12}".format("RNN"), end="")
+    print("| {:<12}".format(f"{max_epoch}"), end="")
+    print("| {:<12}".format(f"{param_rnn}"), end="")
+    print("| {:<12}".format(f"{format_elapsed_time(times_rnn[-1])}"), end="")
+    print("| {:<12}".format(f"{format_elapsed_time(avg_time_rnn)}"), end="|\n")
+    print(f"{'_'*70}")
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -178,10 +177,10 @@ if __name__ == "__main__":
     )
     parser.add_argument("--seed", required=False, type=int, default=1, help="Enter seed number")
     parser.add_argument("--lr", required=False, type=int, default=3, help="Enter the power of learning rate for gradient descent as Learning_rate = 0.1**lr")
-    parser.add_argument("--epoch", required=False, type=int, default=10000, help="Enter the maximum number of epoch that RNN and SIMBa should run")
+    parser.add_argument("--epoch", required=False, type=int, default=4, help="Enter the maximum number of epoch that RNN and SIMBa should run")
     parser.add_argument("--print_each", required=False, type=int, default=1000, help="Enter after how many epochs the losses should be printed")
-    parser.add_argument("--grad_clip", required=False, type=float, default=100, help="Enter the value at which the gradient should be clipped to prevent explosion")
-    parser.add_argument("--nx", required=False, type=int, default=2, help="Enter the output state number of dimensions")
+    parser.add_argument("--grad_clip", required=False, type=float, default=4, help="Enter the value at which the gradient should be clipped to prevent explosion")
+    parser.add_argument("--nx", required=False, type=int, default=1, help="Enter the output state number of dimensions")
     args = parser.parse_args()
     seed = args.seed
     lr = args.lr
@@ -189,4 +188,4 @@ if __name__ == "__main__":
     print_each = args.print_each
     grad_clip = args.grad_clip
     nx = args.nx
-    print(run(seed=seed, lr=0.1**lr, max_epoch=max_epoch, print_each=print_each, grad_clip=grad_clip, nx=nx))
+    print(run(seed=seed, lr=0.1**lr, max_epoch=5000*max_epoch, print_each=print_each, grad_clip=10**(grad_clip-2), nx=2*nx))
