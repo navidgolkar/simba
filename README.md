@@ -15,55 +15,67 @@ SIMBa was first presented in [Stable Linear Subspace Identification: A Machine L
 
 ## SIMBa vs Linear RNN
 
-| Model     | Metric  |
-| --------- | -------- |
+| Model     | Metric   |
+| :-------: | :------: |
 | n         | 2        |
 | LR        | 1.00E-02 |
 | Max e     | 5000     |
 | Grad clip | 100      |
 
+
+**Best model performance:**
 | Model | Epoch | Train loss | Val loss | Test loss | Time |
-| ----- | ----- | ---------- | -------- | --------- | ---- |
+| :---: | :---: | :--------: | :------: | :-------: | :--: |
 | SIMBa | 1500  | 1.76E-02   | 4.09E-02 | 2.30E-01  | 52"  |
 | RNN   | 463   | 2.34E-02   | 7.27E-02 | 7.68E-01  | 11"  |
 
+
+**Time and space performance for training:**
 | Model | max e | # params | Total time | avg time/100e |
-| ----- | ----- | -------- | ---------- | ------------- |
+| :---: | :---: | :------: | :--------: | :-----------: |
 | SIMBa | 5000  | 53       | 02'47"     | 03"           |
 | RNN   | 5000  | 35       | 02'03"     | 02"           |
+---
 
-========================================================
-| Model     | Metric  |
-| --------- | -------- |
+| Model     | Metric   |
+| :-------: | :------: |
 | n         | 2        |
 | LR        | 1.00E-03 |
 | Max e     | 25000    |
 | Grad clip | 100      |
 
+
+**Best model performance:**
 | Model | Epoch | Train loss | Val loss | Test loss | Time   |
-| ----- | ----- | ---------- | -------- | --------- | ------ |
+| :---: | :---: | :--------: | :------: | :-------: | :----: |
 | SIMBa | 1555  | 1.79E-02   | 3.93E-02 | 2.50E-01  | 54"    |
 | RNN   | 4123  | 2.25E-02   | 8.20E-02 | 8.57E-01  | 01'38" |
 
+
+**Time and space performance for training:**
 | Model | max e | # params | Total time | avg time/100e |
-| ----- | ----- | -------- | ---------- | ------------- |
+| :---: | :---: | :------: | :--------: | :-----------: |
 | SIMBa | 25000 | 53       | 14'03"     | 03"           |
 | RNN   | 25000 | 35       | 09'37"     | 02"           |
+---
 
-========================================================
-| Model     | Metric  |
-| --------- | -------- |
+| Model     | Metric   |
+| :-------: | :------: |
 | n         | 6        |
 | LR        | 1.00E-03 |
 | Max e     | 10000    |
 | Grad clip | 100      |
 
+
+**Best model performance:**
 | Model | Epoch | Train loss | Val loss | Test loss | Time   |
-| ----- | ----- | ---------- | -------- | --------- | ------ |
+| :---: | :---: | :--------: | :------: | :-------: | :----: |
 | SIMBa | 2438  | 4.38E-03   | 3.57E-02 | 5.29E-01  | 01'26" |
 | RNN   | 1618  | 1.28E-02   | 7.57E-02 | 8.81E-01  | 34"    |
 
+
+**Time and space performance for training:**
 | Model | max e | # params | Total time | avg time/100e |
-| ----- | ----- | -------- | ---------- | ------------- |
+| :---: | :---: | :------: | :--------: | :-----------: |
 | SIMBa | 10000 | 249      | 05'20"     | 03"           |
 | RNN   | 10000 | 99       | 03'35"     | 02"           |
