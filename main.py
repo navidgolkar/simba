@@ -49,29 +49,29 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
     Y = Y[:,:100,:]
     
     # %% SIMBa run or load
-    # # Run SIMBa
-    # val_losses_simba, test_losses_simba, train_losses_simba, times_simba = simba_run(seed=seed, U=U, Y=Y, U_val=U_val,
-    #                                                                                  Y_val=Y_val, U_test=U_test, Y_test=Y_test,
-    #                                                                                  X=X, X_val=X_val, X_test=X_test,
-    #                                                                                  nx=nx, nu=nu, ny=ny, lr=lr, max_ep=max_epoch,
-    #                                                                                  print_each=print_each, grad_clip=grad_clip)
+    # Run SIMBa
+    val_losses_simba, test_losses_simba, train_losses_simba, times_simba = simba_run(seed=seed, U=U, Y=Y, U_val=U_val,
+                                                                                     Y_val=Y_val, U_test=U_test, Y_test=Y_test,
+                                                                                     X=X, X_val=X_val, X_test=X_test,
+                                                                                     nx=nx, nu=nu, ny=ny, lr=lr, max_ep=max_epoch,
+                                                                                     print_each=print_each, grad_clip=grad_clip)
     
-    # Load SIMBa checkpoint
-    val_losses_simba, test_losses_simba, train_losses_simba, times_simba, lr, print_each, max_epoch = simba_load(seed=seed, nx=nx, nu=nu, ny=ny)
+    # # Load SIMBa checkpoint
+    # val_losses_simba, test_losses_simba, train_losses_simba, times_simba, lr, print_each, max_epoch = simba_load(seed=seed, nx=nx, nu=nu, ny=ny)
     best_epoch_simba = int(np.argmin(val_losses_simba))
     if len(times_simba) > 100:
         avg_time_simba = np.mean(np.array(times_simba[100:]) - np.array(times_simba[:-100]))     
     
     # %% Linear RNN run or load
-    # # Run Linear RNN
-    # val_losses_rnn, test_losses_rnn, train_losses_rnn, times_rnn = rnn_run(seed=seed, U=U, Y=Y, U_val=U_val,
-    #                                                                                  Y_val=Y_val, U_test=U_test, Y_test=Y_test,
-    #                                                                                  X=X, X_val=X_val, X_test=X_test,
-    #                                                                                  n=nx, m=nu, p=ny, lr=lr, max_ep=max_epoch,
-    #                                                                                  print_each=print_each, grad_clip=grad_clip)
+    # Run Linear RNN
+    val_losses_rnn, test_losses_rnn, train_losses_rnn, times_rnn = rnn_run(seed=seed, U=U, Y=Y, U_val=U_val,
+                                                                                     Y_val=Y_val, U_test=U_test, Y_test=Y_test,
+                                                                                     X=X, X_val=X_val, X_test=X_test,
+                                                                                     n=nx, m=nu, p=ny, lr=lr, max_ep=max_epoch,
+                                                                                     print_each=print_each, grad_clip=grad_clip)
     
-    # Load Linear RNN checkpoint
-    val_losses_rnn, test_losses_rnn, train_losses_rnn, times_rnn = rnn_load(seed=seed, n=nx, m=nu, p=ny)
+    # # Load Linear RNN checkpoint
+    # val_losses_rnn, test_losses_rnn, train_losses_rnn, times_rnn = rnn_load(seed=seed, n=nx, m=nu, p=ny)
     best_epoch_rnn = int(np.argmin(val_losses_rnn))
     if len(times_rnn) > 100:
         avg_time_rnn = np.mean(np.array(times_rnn[100:]) - np.array(times_rnn[:-100]))   
