@@ -78,7 +78,7 @@ def rnn_run(seed=1, U=None, Y=None, U_val=None, Y_val=None, U_test=None, Y_test=
         print(f"Total training time:\t\t{format_elapsed_time(model.times[-1])}")
         best_epoch_rnn = int(np.argmin(model.val_losses))
         print("\nBest model performance (by val loss):")
-        print(f"{best_epoch_rnn}\t{model.train_losses[best_epoch_rnn]:.2E}\t{model.val_losses[best_epoch_rnn]:.2E}\t{model.test_losses[best_epoch_rnn]:.2E}\n")  
+        print(f"{best_epoch_rnn + 1}\t{model.train_losses[best_epoch_rnn]:.2E}\t{model.val_losses[best_epoch_rnn]:.2E}\t{model.test_losses[best_epoch_rnn]:.2E}\n")  
             
     # Save best checkpoint
     name = f"linear_rnn_model_{n}"
