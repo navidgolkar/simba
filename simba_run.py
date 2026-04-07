@@ -23,9 +23,9 @@ def simba_load(seed, nx, nu, ny):
     parameters = model.loaded_params
     return model.val_losses, model.test_losses, model.train_losses, model.times, parameters['learning_rate'], parameters['print_each'], parameters['max_epochs']
 
-def simba_run(seed=1, U=None, Y=None, U_val=None, Y_val=None, U_test=None, Y_test=None, X=None, X_val=None, X_test=None, nx=2, nu=100, ny=3, lr=0.001, max_ep=10000, print_each=1000, grad_clip=100):
+def simba_run(seed=1, U=None, Y=None, U_val=None, Y_val=None, U_test=None, Y_test=None, X=None, X_val=None, X_test=None, nx=2, nu=100, ny=3, lr=0.001, max_ep=10000, print_each=1000, grad_clip=100, init=True):
     # Parameters
-    parameters['init_from_matlab_or_ls'] = True
+    parameters['init_from_matlab_or_ls'] = init
     parameters['max_epochs'] = max_ep
     parameters['init_epochs'] = 150000
     if (print_each <= 0):

@@ -9,7 +9,7 @@ from simba_run import simba_run
 from rnn_run import rnn_load
 from simba_run import simba_load
 
-def run(seed, lr, max_epoch, print_each, grad_clip, nx):
+def run(seed, lr, max_epoch, print_each, grad_clip, nx, init):
     #%% Load and process data
     
     # https://homes.esat.kuleuven.be/~smc/daisy/daisydata.html
@@ -54,7 +54,7 @@ def run(seed, lr, max_epoch, print_each, grad_clip, nx):
                                                                                      Y_val=Y_val, U_test=U_test, Y_test=Y_test,
                                                                                      X=X, X_val=X_val, X_test=X_test,
                                                                                      nx=nx, nu=nu, ny=ny, lr=lr, max_ep=max_epoch,
-                                                                                     print_each=print_each, grad_clip=grad_clip)
+                                                                                     print_each=print_each, grad_clip=grad_clip, init=init)
     
     # # Load SIMBa checkpoint
     # val_losses_simba, test_losses_simba, train_losses_simba, times_simba, lr, print_each, max_epoch = simba_load(seed=seed, nx=nx, nu=nu, ny=ny)
@@ -177,15 +177,26 @@ if __name__ == "__main__":
     )
     parser.add_argument("--seed", required=False, type=int, default=1, help="Enter seed number")
     parser.add_argument("--lr", required=False, type=int, default=3, help="Enter the power of learning rate for gradient descent as Learning_rate = 0.1**lr")
-    parser.add_argument("--epoch", required=False, type=int, default=4, help="Enter the maximum number of epoch that RNN and SIMBa should run")
+    parser.add_argument("--epoch", required=False, type=int, default=0, help="Enter the maximum number of epoch that RNN and SIMBa should run")
     parser.add_argument("--print_each", required=False, type=int, default=1000, help="Enter after how many epochs the losses should be printed")
-    parser.add_argument("--grad_clip", required=False, type=float, default=4, help="Enter the value at which the gradient should be clipped to prevent explosion")
-    parser.add_argument("--nx", required=False, type=int, default=1, help="Enter the output state number of dimensions")
+    parser.add_argument("--grad_clip", required=False, type=float, default=3, help="Enter the value at which the gradient should be clipped to prevent explosion")
+    parser.add_argument("--n", required=False, type=int, default=1, help="Enter the output state number of dimensions")
+    parser.add_argument("--init", required=False, type=bool, default=True, help="Enter whether matrix A should be inititialized")
     args = parser.parse_args()
     seed = args.seed
     lr = args.lr
     max_epoch = args.epoch
     print_each = args.print_each
     grad_clip = args.grad_clip
-    nx = args.nx
-    print(run(seed=seed, lr=0.1**lr, max_epoch=5000*max_epoch, print_each=print_each, grad_clip=10**(grad_clip-2), nx=2*nx))
+    init = args.init
+    nx = args.n
+    if max_epoch==0:
+        if lr==1:
+            max_epoch=2
+        elif lr<=3:
+            max_epoch=4
+        elif lr==4:
+            max_epoch=10
+        else:
+            max_epoch=40
+    print(run(seed=seed, lr=0.1**lr, max_epoch=5000*max_epoch, print_each=print_each, grad_clip=10**grad_clip, nx=2*nx, init=init))
