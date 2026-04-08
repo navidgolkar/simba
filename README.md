@@ -13,6 +13,15 @@ You can disable the use of matlab by overwriting `IS_MATLAB` in `simba.parameter
 ## Project status
 SIMBa was first presented in [Stable Linear Subspace Identification: A Machine Learning Approach](https://arxiv.org/pdf/2311.03197.pdf) and subsequently extended in [SIMBa: System Identification Methods leveraging Backpropagation](https://arxiv.org/pdf/2311.13889.pdf).
 
+## Extensions
+I added:
+- example.py which runs the main run of original SIMBa
+- simba/linear_rnn.py which contains the linear recurrent neural network module
+- edited simba/model.py to add times to the saved model
+- rnn_run.py which contains functions for running and loading rnn model
+- simba_run.py which contains functions for running and loading simba model
+- main.py to do a simba and rnn run based on the given parameters (n, grad_clip, learning rate, max epoch, print_each, and whether to initialize simba or not)
+
 ## Linear RNN vs SIMBa
 | n           | LR          | Max e       | Grad clip   |
 | :---------: | :---------: | :---------: | :---------: |
