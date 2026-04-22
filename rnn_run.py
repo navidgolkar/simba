@@ -13,7 +13,7 @@ def rnn_load(seed, n, m, p):
     model.load(path, f"linear_rnn_model_{n}")
     return model.val_losses, model.test_losses, model.train_losses, model.times
 
-def rnn_run(seed=1, U=None, Y=None, U_val=None, Y_val=None, U_test=None, Y_test=None, X=None, X_val=None, X_test=None, n=2, m=100, p=3, lr=0.001, max_ep=10000, print_each=1000, grad_clip=100):
+def rnn_run(seed=1, U=None, Y=None, U_val=None, Y_val=None, U_test=None, Y_test=None, X=None, X_val=None, X_test=None, n=2, m=5, p=3, lr=0.001, max_ep=10000, print_each=1000, grad_clip=100):
     directory = os.path.join('saves', f'Daisy_init_new_{seed}')
     fix_seed(seed)
     print("\n<-- Training of Linear RNN starts! -->")
